@@ -6,7 +6,7 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-body text-center shadow-lg lead text-secondary">
+                    <div class="card-body text-center shadow-lg fs-5 text-secondary">
 
                         <?= $intro_content ?>
 
@@ -30,13 +30,13 @@
         </div>
 
         <div class="mt-3 text-white text-center">
-            <a href="" class="text-white text-decoration-none me-3">
+            <a href="https://github.com/DalatCoder/ninja-php-framework" class="text-white text-decoration-none me-3">
                 <span data-feather="github"></span>
             </a>
-            <a href="" class="text-white text-decoration-none me-3">
+            <a href="https://www.facebook.com/dalatcoder" class="text-white text-decoration-none me-3">
                 <span data-feather="facebook"></span>
             </a>
-            <a href="" class="text-white text-decoration-none me-3">
+            <a href="mailto:hieuntctk42@gmail.com" class="text-white text-decoration-none me-3">
                 <span data-feather="mail"></span>
             </a>
         </div>
