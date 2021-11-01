@@ -18,6 +18,9 @@ class SampleController
             'title' => 'Trang chủ',
             'variables' => [
                 'intro_content' => $introduction
+            ],
+            'custom_styles' => [
+                '/static/css/main.css'
             ]
         ];
     }
