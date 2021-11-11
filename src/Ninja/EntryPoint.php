@@ -42,6 +42,13 @@ class EntryPoint
         return ob_get_clean();
     }
 
+    private function response_json($data, $status_code = 200)
+    {
+        http_response_code($status_code);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data);
+    }
+
     public function run()
     {
         include __DIR__ . '/../../ninja-config.php';
@@ -82,8 +89,8 @@ class EntryPoint
             exit();
         }
 
-        $controller = $routes['404']['controller'];
-        $action = $routes['404']['action'];
+        $controller = $routes['404']['controller'] ?? null;
+        $action = $routes['404']['action'] ?? null;
 
         if (isset($routes[$this->route][$this->method]['controller']))
             $controller = $routes[$this->route][$this->method]['controller'];
@@ -92,6 +99,12 @@ class EntryPoint
             $action = $routes[$this->route][$this->method]['action'];
 
         $page = $controller->$action();
+
+        $type = $page['type'] ?? null;
+        if ($type == 'json') {
+            $status_code = $page['status_code'] ?? 200;
+            return $this->response_json($page, $status_code);
+        }
 
         $master = $page['master'] ?? null;
         if (!$master)
