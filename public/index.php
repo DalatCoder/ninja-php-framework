@@ -1,12 +1,13 @@
 <?php
 
+use Lab05\Lab05Routes;
 use Ninja\EntryPoint;
 
 try {
     include __DIR__ . '/../includes/autoload.php';
 
     $route = strtok($_SERVER['REQUEST_URI'], '?');
-    $routes_handler = new \Sample\SampleRoutes();
+    $routes_handler = new Lab05Routes();
 
     $method = $_SERVER['REQUEST_METHOD'];
 
