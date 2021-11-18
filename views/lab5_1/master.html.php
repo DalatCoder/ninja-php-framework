@@ -1,3 +1,10 @@
+<?php
+    $title = $title ?? 'Ninja Framework';
+    $custom_styles = $custom_styles ?? [];
+    $custom_scripts = $custom_scripts ?? [];
+    $child_content = $child_content ?? [];
+?>
+
 <!doctype html>
 <html lang="en">
 
@@ -20,7 +27,7 @@
 
 <body>
 
-    <?= $content ?>
+    <?= $child_content ?>
 
     <script src="/static/js/bootstrap.bundle.min.js"></script>
 

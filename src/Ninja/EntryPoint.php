@@ -2,13 +2,13 @@
 
 namespace Ninja;
 
-use Ninja\IRoutes;
+use Ninja\NJInterface\IRoutes;
 
 class EntryPoint
 {
-    private $route;
-    private $method;
-    private $route_handler;
+    private string $route;
+    private string $method;
+    private IRoutes $route_handler;
 
     public function __construct($route, $method, IRoutes $route_handler)
     {
@@ -27,59 +27,33 @@ class EntryPoint
         }
     }
 
-    private function checkTemplateDir($templateFileName)
-    {
-        return file_exists(__DIR__ . '/../../templates/' . $templateFileName);
-    }
-
-    private function loadTemplate($templateFileName, $variables = [])
-    {
-        extract($variables);
-
-        ob_start();
-        include __DIR__ . '/../../templates/' . $templateFileName;
-
-        return ob_get_clean();
-    }
-
-    private function response_json($data, $status_code = 200)
-    {
-        http_response_code($status_code);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data);
-    }
-
+    /**
+     * @throws NinjaException
+     */
     public function run()
     {
         include __DIR__ . '/../../ninja-config.php';
 
-        $routes = $this->route_handler->getRoutes();
+        $routes = $this->route_handler->getRoutes() ?? [];
+        $authentication = $this->route_handler->getAuthentication() ?? null;
 
-        $authentication = $this->route_handler->getAuthentication();
-
-        if ($ninja_global_configs['auth'] == true) {
-
-            if (!$authentication)
-                throw new \Exception('Bạn phải viết phương thức getAuthentication');
-
-            $login_required = $routes[$this->route]['login'] ?? false;
-            if ($authentication && $login_required) {
+        $login_required = $routes[$this->route]['login'] ?? false;
+        if ($login_required)
+            if ($authentication)
                 if (!$authentication->isLoggedIn()) {
-                    header('location: /login/error');
+                    http_response_code(401);
+                    header('location: /');
                     exit();
                 }
-            }
-        }
 
-        if ($ninja_global_configs['permission']) {
-            $permission_required = $routes[$this->route]['permissions'] ?? false;
-            if ($permission_required) {
-                $permission = $routes[$this->route]['permissions'];
+        $permission_required = $routes[$this->route]['permissions'] ?? false;
+        if ($permission_required) {
+            $permission = $routes[$this->route]['permissions'];
 
-                if (!$this->route_handler->checkPermission($permission)) {
-                    header('location: /login/error');
-                    exit();
-                }
+            if (!$this->route_handler->checkPermission($permission)) {
+                http_response_code(403);
+                header('location: /');
+                exit();
             }
         }
 
@@ -89,65 +63,26 @@ class EntryPoint
             exit();
         }
 
-        $controller = $routes['404']['controller'] ?? null;
-        $action = $routes['404']['action'] ?? null;
-
+        $controller = null;
         if (isset($routes[$this->route][$this->method]['controller']))
             $controller = $routes[$this->route][$this->method]['controller'];
 
+        $action = null;
         if (isset($routes[$this->route][$this->method]['action']))
             $action = $routes[$this->route][$this->method]['action'];
+        
+        if (!$controller)
+            throw new NinjaException('Controller không hợp lệ');
+        
+        if (!$action)
+            throw new NinjaException('Action không hợp lệ');
 
-        $page = $controller->$action();
+        if (method_exists($controller, 'get_entrypoint_args'))
+            $controller->get_entrypoint_args([
+                'route' => $this->route,
+                'method' => $this->method
+            ]);
 
-        $type = $page['type'] ?? null;
-        if ($type == 'json') {
-            $status_code = $page['status_code'] ?? 200;
-            return $this->response_json($page, $status_code);
-        }
-
-        $master = $page['master'] ?? null;
-        if (!$master)
-            throw new \Exception('Vui lòng thêm thuộc tính master để xác định master layout');
-        if (!$this->checkTemplateDir($master))
-            throw new \Exception('Đường dẫn không hợp lệ! Trang master không tồn tại');
-
-        $title = $page['title'] ?? null;
-        if (!$title)
-            throw new \Exception('Vụi lòng thêm thuộc tính title');
-
-        $templateFileName = $page['template'] ?? null;
-        if (!$templateFileName)
-            throw new \Exception('Vui lòng thêm thuộc tính template để xác định template layout');
-        if (!$this->checkTemplateDir($templateFileName))
-            throw new \Exception('Đường dẫn không hợp lệ! Trang template không tồn tại');
-
-        $variables = $page['variables'] ?? [];
-        $custom_styles = $page['custom_styles'] ?? [];
-        $custom_scripts = $page['custom_scripts'] ?? [];
-
-        $output = $this->loadTemplate($templateFileName, $variables) ?? '';
-
-        $template_args = [
-            'content' => $output,
-            'title' => $title,
-            'custom_styles' => $custom_styles,
-            'custom_scripts' => $custom_scripts,
-            'route' => $this->route,
-            'loggedIn' => null,
-            'shop_name' => null,
-            'loggedInUser' => null
-        ];
-
-        if ($ninja_global_configs['auth']) {
-            $template_args['loggedIn'] = $authentication->isLoggedIn() ?? null;
-            $template_args['loggedInUser'] = $authentication->getUser() ?? null;
-        }
-
-        if ($ninja_global_configs['shop_name']) {
-            $template_args['shop_name'] = $ninja_global_configs['shop_name'];
-        }
-
-        echo $this->loadTemplate($master, $template_args);
+        $controller->$action();
     }
 }

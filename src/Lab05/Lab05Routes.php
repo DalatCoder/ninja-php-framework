@@ -4,7 +4,7 @@ namespace Lab05;
 
 use Lab05\Controller\Lab05;
 use Ninja\Authentication;
-use Ninja\IRoutes;
+use Ninja\NJInterface\IRoutes;
 
 class Lab05Routes implements IRoutes
 {

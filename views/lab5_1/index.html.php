@@ -110,13 +110,13 @@
                 if (result.status === "success") {
                     showResult(result.data.result)
                 } else {
-                    alert('Error: ' + result.message)
+                    alert('Error: ' + result.error)
                 }
 
                 enableCalculateButton()
             })
             .catch(err => {
-                alert('Error! ' + err.message)
+                alert('Error! ' + err.error)
                 enableCalculateButton()
                 console.log(err)
             })

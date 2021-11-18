@@ -2,13 +2,15 @@
 
 namespace Lab05\Controller;
 
-use Ninja\Jsonable;
+use Ninja\NJTrait\Jsonable;
 use Ninja\NinjaException;
+use Ninja\NJTrait\Viewable;
 
 class Lab05
 {
 
     use Jsonable;
+    use Viewable;
 
     public function __construct()
     {
@@ -16,11 +18,12 @@ class Lab05
 
     public function index()
     {
-        return [
-            'master' => 'lab5_1/master.html.php',
-            'template' => 'lab5_1/index.html.php',
-            'title' => 'Máy tính AJAX',
-        ];
+        $this
+            ->load_master_layout('lab5_1/master.html.php', [
+                'title' => 'Máy tính AJAX'
+            ])
+            ->load_child_layout('lab5_1/index.html.php')
+            ->render();
     }
 
     public function calculate()
