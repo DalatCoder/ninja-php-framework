@@ -1,7 +1,7 @@
 <?php
     $title = $title ?? 'Ninja Framework Screen';
     $error_message = $error_message ?? '';
-    $error_stack_trace = $error_stack_trace ?? '';
+    $error_stack_trace = $error_stack_trace ?? [];
 ?>
 
 <!doctype html>
@@ -24,15 +24,49 @@
 
         body {
             box-sizing: border-box;
+            font-family: sans-serif;
+            line-height: 1.5;
+        }
+       
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .error-message {
+            margin: 15px 0;
+        }
+        
+        .card {
+            margin: 15px 0;
         }
     </style>
 </head>
 <body>
 
-<h1>Đã có lỗi xảy ra: <?= $title ?></h1>
+<div class="container">
+    <h1><?= $title ?></h1>
 
-<div>Tin nhắn lỗi: <?= $error_message ?></div>
-<div><?= $error_stack_trace ?></div>
+    <p class="error-message">
+        Tin nhắn lỗi: <strong><?= $error_message ?></strong>
+    </p>
+    
+    <h4>Truy vết các hàm đã thực thi đến thời điểm lỗi xảy ra</h4>
+    <?php foreach ($error_stack_trace as $item): ?>
+        <div class="card">
+            <p>Tập tin: <?= $item['file'] ?? 'N/A' ?></p>
+            <p>Dòng lỗi: <?= $item['line'] ?? 'N/A' ?></p>
+            <p>Tên lớp: <strong><?= $item['class'] ?? 'N/A' ?></strong></p>
+            <p>Tên phương thức: <strong><?= $item['function'] ?? 'N/A' ?></strong></p>
+        </div>
+    <?php endforeach; ?>
+</div>
 
 </body>
 </html>

@@ -7,6 +7,7 @@ try {
     define('ROOT_DIR', dirname(__DIR__ . '/../../'));
     
     include __DIR__ . '/../includes/autoload.php';
+    include __DIR__ . '/../includes/fatal_handler.php';
 
     $route = strtok($_SERVER['REQUEST_URI'], '?');
     $routes_handler = new Lab05Routes();

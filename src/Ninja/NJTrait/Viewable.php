@@ -54,23 +54,25 @@ trait Viewable
             $template_args = [
                 'title' => 'Lỗi từ lập trình viên',
                 'error_message' => $exception->getMessage(),
-                'error_stack_trace' => $exception->getTraceAsString()
+                'error_stack_trace' => $exception->getTrace()
             ];
             $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
             $template_name = 'error.html.php';
             
-            $this->load_template($template_name, $template_args, $template_dir);
+            echo $this->load_template($template_name, $template_args, $template_dir);
+            exit();
         }
         catch (\Exception $exception) {
             $template_args = [
                 'title' => 'Lỗi hệ thống',
                 'error_message' => $exception->getMessage(),
-                'error_stack_trace' => $exception->getTraceAsString()
+                'error_stack_trace' => $exception->getTrace()
             ];
             $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
             $template_name = 'error.html.php';
 
-            $this->load_template($template_name, $template_args, $template_dir);
+            echo $this->load_template($template_name, $template_args, $template_dir);
+            exit();
         }
     }
 
@@ -79,17 +81,17 @@ trait Viewable
      */
     public function tempate_validation(): void
     {
-        if (!$this->master_layout_html_file_path)
+        if (empty($this->master_layout_html_file_path))
             throw new NinjaException('Vui lòng chọn master layout');
 
-        if (!$this->child_layout_html_file_path)
+        if (empty($this->child_layout_html_file_path))
             throw new NinjaException('Vui lòng chọn child layout');
 
         if (!$this->is_template_exists($this->master_layout_html_file_path))
-            throw new NinjaException('Đường dẫn chứa tập tin master layout không tồn tại');
+            throw new NinjaException('Đường dẫn chứa tập tin master layout không tồn tại: ' . $this->master_layout_html_file_path);
 
         if (!$this->is_template_exists($this->child_layout_html_file_path))
-            throw new NinjaException('Đường dẫn chứa tập tin child layout không tồn tại');
+            throw new NinjaException('Đường dẫn chứa tập tin child layout không tồn tại: ' . $this->child_layout_html_file_path);
     }
 
     private function load_template($template_file_name, $args = [], $template_directory = '')
