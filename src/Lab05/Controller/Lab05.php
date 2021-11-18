@@ -2,8 +2,14 @@
 
 namespace Lab05\Controller;
 
+use Ninja\Jsonable;
+use Ninja\NinjaException;
+
 class Lab05
 {
+
+    use Jsonable;
+
     public function __construct()
     {
     }
@@ -19,40 +25,53 @@ class Lab05
 
     public function calculate()
     {
-        $incoming_data = file_get_contents('php://input');
-        $incoming_data = json_decode($incoming_data);
+        try {
+            $incoming_data = file_get_contents('php://input');
+            $incoming_data = json_decode($incoming_data);
 
-        $first_operand = $incoming_data->first_operand ?? null;
-        $second_operand = $incoming_data->second_operand ?? null;
-        $operator = $incoming_data->operator ?? null;
+            $first_operand = $incoming_data->first_operand ?? null;
+            $second_operand = $incoming_data->second_operand ?? null;
+            $operator = $incoming_data->operator ?? null;
 
-        if (!$first_operand || !$second_operand || !$operator) {
-            return [
-                'type' => 'json',
-                'status' => 'error',
-                'message' => 'Dữ liệu không hợp lệ'
+            if (is_null($first_operand) || is_null($second_operand) || is_null($operator))
+                throw new NinjaException('Dữ liệu không hợp lệ', 400);
+
+            $valid_opertors = ['+', '-', '*', '/'];
+
+            if (!in_array($operator, $valid_opertors))
+                throw new NinjaException('Toán tử không hợp lệ', 400);
+            
+            if ($operator == '/' && $second_operand == 0)
+                throw new NinjaException('Không thể chia cho 0', 400);
+
+            $result = $this->process_calculate($first_operand, $second_operand, $operator);
+
+            $response_data = [
+                'status' => 'success',
+                'data' => [
+                    'result' => $result
+                ]
             ];
-        }
-
-        $valid_opertors = ['+', '-', '*', '/'];
-
-        if (!in_array($operator, $valid_opertors)) {
-            return [
-                'type' => 'json',
-                'status' => 'error',
-                'message' => 'Toán tử không hợp lệ'
+            $status_code = 200;
+        } catch (NinjaException $exception) {
+            $response_data = [
+                'status' => 'fail',
+                'data' => 'null',
+                'error' => $exception->getMessage()
             ];
+
+            $status_code = $exception->get_status_code();
+        } catch (\Exception $exception) {
+            $response_data = [
+                'status' => 'error',
+                'data' => 'null',
+                'error' => 'Server Error'
+            ];
+
+            $status_code = 500;
+        } finally {
+            $this->response_json($response_data, $status_code);
         }
-
-        $result = $this->process_calculate($first_operand, $second_operand, $operator);
-
-        return [
-            'type' => 'json',
-            'status' => 'success',
-            'data' => [
-                'result' => $result
-            ]
-        ];
     }
 
     private function process_calculate($first_operand, $second_operand, $operator)
