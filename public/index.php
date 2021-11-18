@@ -2,10 +2,11 @@
 
 use Lab05\Lab05Routes;
 use Ninja\EntryPoint;
+use Ninja\NinjaException;
 
 try {
     define('ROOT_DIR', dirname(__DIR__ . '/../../'));
-    
+
     include __DIR__ . '/../includes/autoload.php';
     include __DIR__ . '/../includes/fatal_handler.php';
 
@@ -16,22 +17,37 @@ try {
 
     $entryPoint = new EntryPoint($route, $method, $routes_handler);
     $entryPoint->run();
-} 
-catch (\Ninja\NinjaException $e) {
-    echo $e->getTraceAsString();
-}
-catch (\PDOException $e) {
-    $title = 'Đã có lỗi nghiêm trọng xảy ra';
-    $content = 'Lỗi trong quá trình kết nối CSDL: ' . $e->getMessage() . ' in ' . $e->getFile() . ': ' . $e->getLine();
-    $custom_styles = [];
-    $custom_scripts = [];
+} catch (NinjaException $exception) {
+    $template_args = [
+        'title' => 'Lỗi từ lập trình viên khi sử dụng Ninja Framework',
+        'error_message' => $exception->getMessage(),
+        'error_stack_trace' => $exception->getTrace()
+    ];
 
-    include __DIR__ . '/../views/master.html.php';
-} catch (\Exception $e) {
-    $title = 'Đã có lỗi nghiêm tọng xảy ra';
-    $content = 'Đã có lỗi nghiêm trọng xảy ra: "' . $e->getMessage() . '" tại tập tin: ' . $e->getFile() . ': ' . $e->getLine();
-    $custom_styles = [];
-    $custom_scripts = [];
+    $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
+    $template_name = 'error.html.php';
 
-    include __DIR__ . '/../views/master.html.php';
+    echo $this->load_template($template_name, $template_args, $template_dir);
+} catch (\PDOException $exception) {
+    $template_args = [
+        'title' => 'Lỗi trong quá trình kết nối CSDL sử dụng PDO',
+        'error_message' => $exception->getMessage(),
+        'error_stack_trace' => $exception->getTrace()
+    ];
+
+    $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
+    $template_name = 'error.html.php';
+
+    echo $this->load_template($template_name, $template_args, $template_dir);
+} catch (\Exception $exception) {
+    $template_args = [
+        'title' => 'Lỗi hệ thống',
+        'error_message' => $exception->getMessage(),
+        'error_stack_trace' => $exception->getTrace()
+    ];
+
+    $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
+    $template_name = 'error.html.php';
+
+    echo $this->load_template($template_name, $template_args, $template_dir);
 }
