@@ -106,7 +106,6 @@
             })
             .then(response => response.json())
             .then(result => {
-                debugger;
                 console.log(result)
                 if (result.status === "success") {
                     showResult(result.data.result)
