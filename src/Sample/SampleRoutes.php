@@ -19,7 +19,7 @@ class SampleRoutes implements \Ninja\NJInterface\IRoutes
             '/' => [
                 'GET' => [
                     'controller' => $sampleController,
-                    'action' => 'show_home_page'
+                    'action' => 'test_template'
                 ]
             ],
             '404' => [

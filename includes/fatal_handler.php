@@ -89,8 +89,7 @@ function format_error($errno, $errstr, $errfile, $errline)
             Tin nhắn lỗi: <strong><?= $error_stack_trace[0] ?></strong>
         </p>
 
-        <h4>Truy vết các hàm đã thực thi đến thời điểm lỗi xảy ra</h4>
-        <?php for ($i = 2; $i < count($error_stack_trace) - 1; $i++): ?>
+        <h4>Truy vết các hàm đã thực thi đến thời điểm lỗi xảy ra</h4>566666        <?php for ($i = 2; $i < count($error_stack_trace) - 1; $i++): ?>
             <div class="card">
                 <p><?= $error_stack_trace[$i] ?></p>
             </div>
