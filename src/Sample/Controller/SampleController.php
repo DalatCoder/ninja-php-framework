@@ -26,7 +26,7 @@ class SampleController extends NJBaseController
     
     public function test_template()
     {
-        Template::view('about.html', [
+        Template::view('about.html.php', [
             'title' => 'Home Page',
             'colors' => ['rd','blue','green']
         ]);

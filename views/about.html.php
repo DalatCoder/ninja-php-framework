@@ -1,4 +1,4 @@
-{% extends layout.html %}
+{% extends layout.html.php %}
 
 {% block title %}{{ $title }}{% endblock %}
 
@@ -6,8 +6,8 @@
 <h1>Home</h1>
 <p>Welcome to the home page, list of colors:</p>
 <ul>
-    {% foreach($colors as $color): %}
-    <li>{{ $color }}</li>
-    {% endforeach; %}
+    <?php foreach ($colors as $color): ?>
+        <li><?= $color ?></li>
+    <?php endforeach; ?>
 </ul>
 {% endblock %}
