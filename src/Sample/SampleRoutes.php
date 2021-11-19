@@ -3,8 +3,9 @@
 namespace Sample;
 
 use Ninja\Authentication;
+use Sample\Controller\SampleController;
 
-class SampleRoutes implements \Ninja\IRoutes
+class SampleRoutes implements \Ninja\NJInterface\IRoutes
 {
     public function __construct()
     {
@@ -12,7 +13,7 @@ class SampleRoutes implements \Ninja\IRoutes
 
     public function getRoutes(): array
     {
-        $sampleController = new \Sample\Controller\SampleController();
+        $sampleController = new SampleController();
 
         return [
             '/' => [

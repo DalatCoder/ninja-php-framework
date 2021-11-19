@@ -2,35 +2,24 @@
 
 namespace Sample\Controller;
 
-class SampleController
-{
-    public function __construct()
-    {
-    }
+use Ninja\NJBaseController\NJBaseController;
 
+class SampleController extends NJBaseController
+{
     public function show_home_page()
     {
         $introduction = 'Chào mừng đến với PHP Ninja Framework';
-
-        return [
-            'master' => 'master.html.php',
-            'template' => 'index.html.php',
-            'title' => 'Trang chủ',
-            'variables' => [
+        
+        $this->view_handler
+            ->load_master_layout('master.html.php', [
+                'title' => 'Trang chủ',
+                'custom_styles' => [
+                    '/static/css/main.css'
+                ]
+            ])
+            ->load_child_layout('index.html.php', [
                 'intro_content' => $introduction
-            ],
-            'custom_styles' => [
-                '/static/css/main.css'
-            ]
-        ];
-    }
-
-    public function show_404_page()
-    {
-        return [
-            'master' => 'master.html.php',
-            'template' => '404.html.php',
-            'title' => 'Không tìm thấy trang này'
-        ];
+            ])
+            ->render();
     }
 }

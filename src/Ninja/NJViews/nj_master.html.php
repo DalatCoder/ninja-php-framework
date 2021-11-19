@@ -8,6 +8,6 @@
     <title>Document</title>
 </head>
 <body>
-
+<?= $child_content ?>
 </body>
 </html>

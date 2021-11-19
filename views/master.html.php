@@ -20,7 +20,7 @@
 
 <body>
 
-    <?= $content ?>
+    <?= $child_content ?>
 
     <script src="/static/js/bootstrap.bundle.min.js"></script>
 

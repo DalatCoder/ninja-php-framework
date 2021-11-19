@@ -2,6 +2,7 @@
 
 namespace Ninja;
 
+use Ninja\NJBaseController\NJBaseController;
 use Ninja\NJInterface\IRoutes;
 
 class EntryPoint
@@ -43,7 +44,7 @@ class EntryPoint
             exit();
         }
 
-        $controller = $routes[$this->route][$this->method]['controller'] ?? null;
+        $controller = $routes[$this->route][$this->method]['controller'] ?? new NJBaseController();
         $action = $routes[$this->route][$this->method]['action'] ?? null;
 
         if (!$controller || !$action) {
@@ -54,7 +55,7 @@ class EntryPoint
                 ]);
                 exit();
             } else
-                throw new NinjaException('Đường dẫn không tồn tại');
+                throw new NinjaException("Đường dẫn: {$this->route} không tồn tại");
         }
 
         if (!method_exists($controller, $action))
