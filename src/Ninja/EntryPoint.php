@@ -37,26 +37,6 @@ class EntryPoint
         $routes = $this->route_handler->getRoutes() ?? [];
         $authentication = $this->route_handler->getAuthentication() ?? null;
 
-        $login_required = $routes[$this->route]['login'] ?? false;
-        if ($login_required)
-            if ($authentication)
-                if (!$authentication->isLoggedIn()) {
-                    http_response_code(401);
-                    header('location: /');
-                    exit();
-                }
-
-        $permission_required = $routes[$this->route]['permissions'] ?? false;
-        if ($permission_required) {
-            $permission = $routes[$this->route]['permissions'];
-
-            if (!$this->route_handler->checkPermission($permission)) {
-                http_response_code(403);
-                header('location: /');
-                exit();
-            }
-        }
-
         if (isset($routes[$this->route]['REDIRECT'])) {
             http_response_code(301);
             header('location: ' . $routes[$this->route]['REDIRECT']);
@@ -70,18 +50,52 @@ class EntryPoint
         $action = null;
         if (isset($routes[$this->route][$this->method]['action']))
             $action = $routes[$this->route][$this->method]['action'];
-        
+
         if (!$controller)
             throw new NinjaException('Controller không hợp lệ');
-        
+
         if (!$action)
             throw new NinjaException('Action không hợp lệ');
+        
+        if (!method_exists($controller, $action))
+            throw new NinjaException("Action: $action không tồn tại trên Controller: $controller");
 
         if (method_exists($controller, 'get_entrypoint_args'))
             $controller->get_entrypoint_args([
                 'route' => $this->route,
                 'method' => $this->method
             ]);
+
+        $login_required = $routes[$this->route]['login'] ?? false;
+        if ($login_required) {
+            if (method_exists($controller, 'handle_on_invalid_authentication')) {
+                $controller->handle_on_invalid_authentication([
+                    'route' => $this->route,
+                    'method' => $this->method
+                ]);
+                exit();
+            }
+            else 
+                throw new NinjaException('Bạn phải đăng nhập để tiếp tục', 401);
+        }
+
+        $permission_required = $routes[$this->route]['permissions'] ?? false;
+        if ($permission_required) {
+            $permission = $routes[$this->route]['permissions'];
+
+            if (!$this->route_handler->checkPermission($permission)) {
+                
+                if (method_exists($controller, 'handle_on_invalid_permission')) {
+                    $controller->handle_on_invalid_permission([
+                        'route' => $this->route,
+                        'method' => $this->method
+                    ]);
+                    exit();
+                }
+                else 
+                    throw new NinjaException('Bạn không có quyền thực hiện tính năng này', 401);
+            }
+        }
 
         $controller->$action();
     }

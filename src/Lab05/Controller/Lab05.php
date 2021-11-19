@@ -8,7 +8,6 @@ use Ninja\NJTrait\Viewable;
 
 class Lab05
 {
-
     use Jsonable;
     use Viewable;
 
