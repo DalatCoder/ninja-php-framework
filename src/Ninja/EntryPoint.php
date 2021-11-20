@@ -26,6 +26,13 @@ class EntryPoint
             header('location: ' . strtolower($this->route));
             exit();
         }
+        
+        $last_character = substr($this->route, -1);
+        if ($last_character === '/') {
+            http_response_code(301);
+            header('location: ' . rtrim($this->route, '/'));
+            exit();
+        }
     }
 
     /**

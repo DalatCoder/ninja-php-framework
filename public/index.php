@@ -12,7 +12,7 @@ try {
 
     $route = strtok($_SERVER['REQUEST_URI'], '?');
     $routes_handler = new \Lab07\Lab07RoutesHandler();
-
+    
     $method = $_SERVER['REQUEST_METHOD'];
 
     $entryPoint = new EntryPoint($route, $method, $routes_handler);
@@ -25,7 +25,7 @@ try {
     ];
 
     $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
-    $template_name = 'nj_error.html.php';
+    $template_name = 'error.html.php';
 
     echo load_template($template_name, $template_args);
 } catch (\PDOException $exception) {
@@ -36,7 +36,7 @@ try {
     ];
 
     $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
-    $template_name = 'nj_error.html.php';
+    $template_name = 'error.html.php';
 
     echo load_template($template_name, $template_args);
 } catch (\Exception $exception) {
@@ -47,7 +47,7 @@ try {
     ];
 
     $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
-    $template_name = 'nj_error.html.php';
+    $template_name = 'error.html.php';
 
     echo load_template($template_name, $template_args);
 } 

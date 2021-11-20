@@ -3,7 +3,7 @@
 namespace Sample\Controller;
 
 use Ninja\NJBaseController\NJBaseController;
-use Ninja\Template;
+use Ninja\TemplateBak;
 
 class SampleController extends NJBaseController
 {
@@ -26,7 +26,7 @@ class SampleController extends NJBaseController
     
     public function test_template()
     {
-        Template::view('about.html.php', [
+        TemplateBak::view('about.html.php', [
             'title' => 'Home Page',
             'colors' => ['rd','blue','green']
         ]);

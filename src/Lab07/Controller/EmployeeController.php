@@ -4,7 +4,6 @@ namespace Lab07\Controller;
 
 use Ninja\DatabaseTable;
 use Ninja\NJTrait\Jsonable;
-use Ninja\Template;
 
 class EmployeeController extends \Ninja\NJBaseController\NJBaseController implements \Ninja\NJInterface\IController
 {
@@ -25,7 +24,7 @@ class EmployeeController extends \Ninja\NJBaseController\NJBaseController implem
     {
         $employees = $this->employee_table->findAll();
         
-        Template::view('lab07/employee/index.html.php', [
+        $this->view_handler->render('lab07/employee/index.html.php', [
             'employees' => $employees
         ]);
     }
@@ -36,7 +35,7 @@ class EmployeeController extends \Ninja\NJBaseController\NJBaseController implem
         
         $employee = $this->employee_table->findById($id);
         
-        Template::view('lab07/employee/show.html.php', [
+        $this->view_handler->render('lab07/employee/show.html.php', [
             'employee' => $employee
         ]);
     }
@@ -45,7 +44,7 @@ class EmployeeController extends \Ninja\NJBaseController\NJBaseController implem
     {
         $departments = $this->department_table->findAll();
         
-        Template::view('lab07/employee/create.html.php', [
+        $this->view_handler->render('lab07/employee/create.html.php', [
             'departments' => $departments
         ]);
     }
@@ -65,7 +64,7 @@ class EmployeeController extends \Ninja\NJBaseController\NJBaseController implem
         $employee = $this->employee_table->findById($employee_id);
         $departments = $this->department_table->findAll();
         
-        Template::view('lab07/employee/edit.html.php', [
+        $this->view_handler->render('lab07/employee/edit.html.php', [
             'employee' => $employee,
             'departments' => $departments
         ]);

@@ -1,4 +1,4 @@
-<?php class_exists('Ninja\Template') or exit; ?>
+<?php class_exists('Ninja\TemplateBak') or exit; ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>

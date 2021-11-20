@@ -4,110 +4,128 @@ namespace Ninja;
 
 class ViewHandler
 {
-    private string $master_layout_html_file_path;
-    private array $master_layout_args;
+    const EXTEND_PATTERN = '/{% ?(extends|include) ?\'?(.*?)\'? ?%}/i';
+    const BLOCK_PATTERN = '/{% ?block ?(.*?) ?%}(.*?){% ?endblock ?%}/is';
+    const YIELD_PATTERN = '/{% ?yield ?(.*?) ?%}/i';
+    const ECHO_SUGAR_PATTERN = '~\{{\s*(.+?)\s*\}}~is';
+    const ESCAPED_ECHO_SUGAR_PATTER = '~\{{{\s*(.+?)\s*\}}}~is';
+    const PHP_SUGAR_PATTERN = '~\{%\s*(.+?)\s*\%}~is';
 
-    private string $child_layout_html_file_path;
-    private array $child_layout_args;
-
-    private string $child_placeholder_name;
-
-    public function set_child_placeholder_name($placeholder_name)
+    private string $view_directory = '';
+    private array $block_sections = [];
+    
+    public function set_view_directory($directory_path): ViewHandler
     {
-        $this->child_placeholder_name = $placeholder_name;
-    }
-
-    public function load_master_layout($master_layout_file_name, $master_args = []): ViewHandler
-    {
-        $this->master_layout_html_file_path = $master_layout_file_name;
-        $this->master_layout_args = $master_args;
-
+        $this->view_directory = rtrim($directory_path, '/') . '/';
         return $this;
     }
 
-    public function load_child_layout($child_layout_file_name, $child_args = []): ViewHandler
-    {
-        $this->child_layout_html_file_path = $child_layout_file_name;
-        $this->child_layout_args = $child_args;
-
-        return $this;
-    }
-
-    public function render()
+    public function render($template_file_path, $template_args = [])
     {
         try {
-            $this->tempate_validation();
+            $template_file_path = ltrim($template_file_path, '/');
 
-            $child_content = $this->load_template($this->child_layout_html_file_path, $this->child_layout_args);
+            if (empty($this->view_directory))
+                $this->load_view_path_from_configuration();
 
-            $child_placeholder_name = $this->child_placeholder_name ?? 'child_content';
+            $source = $this->include_files($template_file_path);
+            
+            $source = $this->compile_source($source);
 
-            $this->master_layout_args[$child_placeholder_name] = $child_content;
-            $master_content = $this->load_template($this->master_layout_html_file_path, $this->master_layout_args);
+            extract($template_args);
 
-            echo $master_content;
+            // TODO: Dangerous code, replace me later
+            eval("?> $source <?php");
+
             exit();
         }
         catch (NinjaException $exception) {
-            $template_args = [
-                'title' => 'Lỗi từ lập trình viên',
-                'error_message' => $exception->getMessage(),
-                'error_stack_trace' => $exception->getTrace()
-            ];
-            $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
-            $template_name = 'error.html.php';
-
-            echo $this->load_template($template_name, $template_args, $template_dir);
-            exit();
+            $this->handle_on_view_not_found($exception);
         }
-        catch (\Exception $exception) {
-            $template_args = [
-                'title' => 'Lỗi hệ thống',
-                'error_message' => $exception->getMessage(),
-                'error_stack_trace' => $exception->getTrace()
-            ];
-            $template_dir = ROOT_DIR . '/src/Ninja/NJViews/';
-            $template_name = 'error.html.php';
-
-            echo $this->load_template($template_name, $template_args, $template_dir);
-            exit();
-        }
+    }
+    
+    private function handle_on_view_not_found(NinjaException $exception)
+    {
+        echo $exception->getMessage();
+    }
+    
+    private function load_view_path_from_configuration()
+    {
+        $this->view_directory = ROOT_DIR . '/views/';
     }
 
     /**
      * @throws NinjaException
      */
-    private function tempate_validation(): void
+    private function include_files($starter_file_path)
     {
-        if (empty($this->master_layout_html_file_path))
-            throw new NinjaException('Vui lòng chọn master layout');
-
-        if (empty($this->child_layout_html_file_path))
-            throw new NinjaException('Vui lòng chọn child layout');
-    }
-
-    /**
-     * @throws NinjaException
-     */
-    private function load_template($template_file_name, $args = [], $template_directory = ROOT_DIR . '/views/')
-    {
-        if (!$this->is_template_exists($template_file_name, $template_directory)) 
-            if (!$this->is_template_exists($template_file_name, ROOT_DIR . '/src/Ninja/NJViews/'))
-                throw new NinjaException('Đường dẫn chứa tập tin master layout không tồn tại: ' . $this->master_layout_html_file_path);
-            else 
-                $template_directory = ROOT_DIR . '/src/Ninja/NJViews/';
+        $file = $this->view_directory . $starter_file_path;
+        if (!file_exists($file)) 
+            throw new NinjaException('Đường dẫn layout không tồn tại: ' . $file);
         
-        extract($args);
-
-        ob_start();
-
-        include $template_directory . $template_file_name;
-
-        return ob_get_clean();
+        $source = file_get_contents($file);
+        
+        preg_match_all(self::EXTEND_PATTERN, $source, $matches, PREG_SET_ORDER);
+        
+        foreach ($matches as $value) {
+            $source = str_replace($value[0], $this->include_files($value[2]), $source);
+        }
+        
+        // Clear unnecessary 'extend' 'include'
+        return preg_replace(self::EXTEND_PATTERN, '', $source);
     }
 
-    private function is_template_exists($template_file_name, $template_directory = ROOT_DIR . '/views/'): bool
+    private function compile_source($source)
     {
-        return file_exists($template_directory . $template_file_name);
+        $source = $this->compile_block_syntax($source);
+        $source = $this->compile_yield_syntax($source);
+        $source = $this->compile_echo_sugar_syntax($source);
+        $source = $this->compile_escaped_echo_sugar_syntax($source);
+
+        return $this->compile_php_sugar_syntax($source);
+    }
+
+    private function compile_block_syntax($source)
+    {
+        preg_match_all(self::BLOCK_PATTERN, $source, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $value) {
+            if (!array_key_exists($value[1], $this->block_sections))
+                $this->block_sections[$value[1]] = '';
+
+            if (strpos($value[2], '@parent') === false) {
+                $this->block_sections[$value[1]] = $value[2];
+            } else {
+                $this->block_sections[$value[1]] = str_replace('@parent', $this->block_sections[$value[1]], $value[2]);
+            }
+
+            $source = str_replace($value[0], '', $source);
+        }
+
+        return $source;
+    }
+
+    private function compile_yield_syntax($source)
+    {
+        foreach ($this->block_sections as $block => $value) {
+            $source = preg_replace('/{% ?yield ?' . $block . ' ?%}/', $value, $source);
+        }
+
+        return preg_replace(self::YIELD_PATTERN, '', $source);
+    }
+
+    private function compile_echo_sugar_syntax($source)
+    {
+        return preg_replace(self::ECHO_SUGAR_PATTERN, '<?php echo $1 ?>', $source);
+    }
+
+    private function compile_escaped_echo_sugar_syntax($source)
+    {
+        return preg_replace(self::ESCAPED_ECHO_SUGAR_PATTER, '<?php echo htmlentities($1, ENT_QUOTES, \'UTF-8\') ?>', $source);
+    }
+
+    private function compile_php_sugar_syntax($source)
+    {
+        return preg_replace(self::PHP_SUGAR_PATTERN, '<?php $1 ?>', $source);
     }
 }

@@ -22,24 +22,21 @@ class NJBaseController
     public function handle_on_invalid_authentication(array $args)
     {
         $this->view_handler
-            ->load_master_layout('nj_master.html.php')
-            ->load_child_layout('nj_401.html.php')
-            ->render();
+            ->set_view_directory(ROOT_DIR . '/src/Ninja/NJViews/')
+            ->render('401.html.php');
     }
     
     public function handle_on_invalid_permission($args)
     {
         $this->view_handler
-            ->load_master_layout('nj_master.html.php')
-            ->load_child_layout('nj_403.html.php')
-            ->render();
+            ->set_view_directory(ROOT_DIR . '/src/Ninja/NJViews/')
+            ->render('403.html.php');
     }
     
     public function handle_on_page_not_found($args)
     {
         $this->view_handler
-            ->load_master_layout('nj_master.html.php')
-            ->load_child_layout('nj_404.html.php')
-            ->render();
+            ->set_view_directory(ROOT_DIR . '/src/Ninja/NJViews/')
+            ->render('404.html.php');
     }
 }
