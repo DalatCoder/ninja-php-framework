@@ -1,3 +1,9 @@
+<?php
+$title = $title ?? 'Ninja Framework';
+$custom_styles = $custom_styles ?? [];
+$custom_scripts = $custom_scripts ?? [];
+?>
+
 <!doctype html>
 <html lang="en">
 
@@ -13,24 +19,26 @@
     <!-- Feather icon -->
     <script src="/static/js/feather.min.js"></script>
 
-    <?php foreach ($custom_styles as $style): ?>
+    <?php foreach ($custom_styles as $style) : ?>
         <link rel="stylesheet" href="<?= $style ?>">
     <?php endforeach; ?>
 </head>
 
 <body>
 
-    <?= $child_content ?>
+<div class="container">
+    {% yield content %}
+</div>
 
-    <script src="/static/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        window.feather.replace();
-    </script>
+<script>
+    window.feather.replace();
+</script>
 
-    <?php foreach ($custom_scripts as $script): ?>
-        <script src="<?= $script ?>"></script>
-    <?php endforeach; ?>
+<?php foreach ($custom_scripts as $script) : ?>
+    <script src="<?= $script ?>"></script>
+<?php endforeach; ?>
 
 </body>
 

@@ -12,9 +12,9 @@ class Template
     {
         $code = self::includeFiles($file);
         $code = self::compileCode($code);
-        
-        extract($data, EXTR_SKIP);
-        
+
+        extract($data );
+
         // TODO: Dangerous code, replace me later
         eval("?> $code <?php");
     }
@@ -24,7 +24,7 @@ class Template
         if (!file_exists(self::$cache_path)) {
             mkdir(self::$cache_path, 0744);
         }
-        
+
         $cached_file = self::$cache_path . str_replace(array('/', '.html'), array('_', ''), $file . '.php');
         if (!self::$cache_enabled || !file_exists($cached_file) || filemtime($cached_file) < filemtime($file)) {
             $code = self::includeFiles($file);
@@ -103,5 +103,3 @@ class Template
     }
 
 }
-
-?>

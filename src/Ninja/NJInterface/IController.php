@@ -4,11 +4,11 @@ namespace Ninja\NJInterface;
 
 interface IController
 {
-    public function index() : array;
-    public function show() : array;
-    public function create() : array;
-    public function store() : void;
-    public function edit() : array;
-    public function update() : void;
-    public function destroy() : void;
+    public function index();
+    public function show();
+    public function create();
+    public function store();
+    public function edit();
+    public function update();
+    public function destroy();
 }
