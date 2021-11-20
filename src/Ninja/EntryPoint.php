@@ -10,7 +10,7 @@ class EntryPoint
     private string $route;
     private string $method;
     private IRoutes $route_handler;
-
+    
     public function __construct($route, $method, IRoutes $route_handler)
     {
         $this->route = $route;
@@ -40,8 +40,6 @@ class EntryPoint
      */
     public function run()
     {
-        include __DIR__ . '/../../ninja-config.php';
-
         $routes = $this->route_handler->getRoutes() ?? [];
         $authentication = $this->route_handler->getAuthentication() ?? null;
 
@@ -71,7 +69,8 @@ class EntryPoint
         if (method_exists($controller, 'get_entrypoint_args'))
             $controller->get_entrypoint_args([
                 'route' => $this->route,
-                'method' => $this->method
+                'method' => $this->method,
+                'shop_name' => NJConfiguration::get('shop_name') ?? null
             ]);
 
         $login_required = $routes[$this->route]['login'] ?? false;

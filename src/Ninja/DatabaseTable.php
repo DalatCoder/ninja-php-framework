@@ -27,14 +27,12 @@ class DatabaseTable
 
     public function init_database()
     {
-        include __DIR__ . '/../../ninja-config.php';
-
-        $db_name = $ninja_global_configs['db_name'];
-        $db_host = $ninja_global_configs['db_host'];
-        $db_charset = $ninja_global_configs['db_charset'];
-        $db_username = $ninja_global_configs['db_username'];
-        $db_password = $ninja_global_configs['db_password'];
-
+        $db_name = NJConfiguration::get('db_name') ?? null;
+        $db_host = NJConfiguration::get('db_host') ?? null;
+        $db_charset = NJConfiguration::get('db_charset') ?? null;
+        $db_username = NJConfiguration::get('db_username') ?? null;
+        $db_password = NJConfiguration::get('db_password') ?? null;
+        
         $this->pdo = new \PDO("mysql:host=$db_host;dbname=$db_name;charset=$db_charset", $db_username, $db_password);
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }

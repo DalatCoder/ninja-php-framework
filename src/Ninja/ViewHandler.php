@@ -51,7 +51,7 @@ class ViewHandler
     
     private function load_view_path_from_configuration()
     {
-        $this->view_directory = ROOT_DIR . '/views/';
+        $this->view_directory = ROOT_DIR . '/' . trim(NJConfiguration::get('view_folder'), '/') . '/';
     }
 
     /**

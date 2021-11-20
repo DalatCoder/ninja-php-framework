@@ -4,7 +4,6 @@ namespace Lab07\Controller;
 
 use Ninja\DatabaseTable;
 use Ninja\NJTrait\Jsonable;
-use Ninja\TemplateBak;
 
 class DepartmentController extends \Ninja\NJBaseController\NJBaseController implements \Ninja\NJInterface\IController
 {
@@ -23,7 +22,7 @@ class DepartmentController extends \Ninja\NJBaseController\NJBaseController impl
     {
         $departments = $this->department_table->findAll();
         
-        TemplateBak::view('lab07/department/index.html.php', [
+        $this->view_handler->render('lab07/department/index.html.php', [
             'departments' => $departments
         ]);
     }
